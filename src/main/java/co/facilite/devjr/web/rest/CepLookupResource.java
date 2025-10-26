@@ -20,7 +20,8 @@ public class CepLookupResource {
 
     @GetMapping("/cep/{cep}")
     public ResponseEntity<AddressDTO> getCep(@PathVariable String cep) {
-        AddressDTO addressDto = cepLookupService.lookup(cep);
+        String normalizedCep = cepLookupService.normalizeCep(cep);
+        AddressDTO addressDto = cepLookupService.lookup(normalizedCep);
         return ResponseEntity.ok(addressDto);
     }
 }
