@@ -11,7 +11,7 @@ import org.mapstruct.*;
 /**
  * Mapper for the entity {@link Employee} and its DTO {@link EmployeeDTO}.
  */
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", config = MapperConfiguration.class)
 public interface EmployeeMapper extends EntityMapper<EmployeeDTO, Employee> {
     @Mapping(target = "address", source = "address", qualifiedByName = "addressId")
     @Mapping(target = "department", source = "department", qualifiedByName = "departmentName")
