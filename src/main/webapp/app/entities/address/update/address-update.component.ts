@@ -102,9 +102,13 @@ export class AddressUpdateComponent implements OnInit {
     try {
       const address: IAddress = await firstValueFrom(this.cepLookupService.lookup(cepValue));
       const currentNumber = this.editForm.get('number')?.value;
+      let currentComplement = this.editForm.get('complement')?.value;
+      if (address.complement != null) {
+        currentComplement = address.complement;
+      }
       this.editForm.patchValue({
         street: address.street ?? '',
-        complement: address.complement ?? '',
+        complement: currentComplement ?? '',
         district: address.district ?? '',
         city: address.city ?? '',
         uf: address.uf ?? null,
@@ -124,5 +128,18 @@ export class AddressUpdateComponent implements OnInit {
     } finally {
       this.isBuscandoCep = false;
     }
+  }
+  formatCep(): void {
+    const cepControl = this.editForm.get('cep');
+    if (!cepControl) {
+      return;
+    }
+    const raw: string = (cepControl.value ?? '') as string;
+    const digits = raw.replace(/\D/g, '').slice(0, 8);
+    let formatted = digits;
+    if (digits.length > 5) {
+      formatted = digits.slice(0, 5) + '-' + digits.slice(5);
+    }
+    cepControl.setValue(formatted, { emitEvent: false });
   }
 }

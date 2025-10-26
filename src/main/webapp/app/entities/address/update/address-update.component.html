@@ -19,7 +19,16 @@
         <div class="mb-3">
           <label class="form-label" for="field_cep" jhiTranslate="devjrApp.address.cep">Cep</label>
           <div class="input-group">
-            <input type="text" class="form-control" name="cep" id="field_cep" data-cy="cep" formControlName="cep" />
+            <input
+              type="text"
+              class="form-control"
+              name="cep"
+              id="field_cep"
+              data-cy="cep"
+              formControlName="cep"
+              (input)="formatCep()"
+              maxlength="9"
+            />
             <button type="button" class="btn btn-primary" (click)="onBuscarCep()" [disabled]="isBuscandoCep || !editForm.get('cep')?.valid">
               <fa-icon [icon]="isBuscandoCep ? spinnerIcon : searchIcon" [class.fa-spin]="isBuscandoCep"></fa-icon>&nbsp;
               <span jhiTranslate="devjrApp.address.cepLookup">Buscar CEP</span>
