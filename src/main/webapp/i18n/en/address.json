@@ -25,7 +25,13 @@
       "district": "District",
       "city": "City",
       "uf": "Uf",
-      "employee": "Employee"
+      "employee": "Employee",
+      "cepLookup": "Search CEP",
+      "cepError": {
+        "invalid": "Invalid CEP",
+        "notFound": "CEP not found",
+        "serviceUnavailable": "CEP service unavailable"
+      }
     }
   }
 }

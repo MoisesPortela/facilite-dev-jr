@@ -1,32 +1,42 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { Observable } from 'rxjs';
+import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import SharedModule from 'app/shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { faSpinner, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';
 
 import { Uf } from 'app/entities/enumerations/uf.model';
 import { IAddress } from '../address.model';
 import { AddressService } from '../service/address.service';
 import { AddressFormGroup, AddressFormService } from './address-form.service';
+import { CepLookupService } from 'app/entities/address/service/cep-lookup.service';
 
 @Component({
   selector: 'jhi-address-update',
   templateUrl: './address-update.component.html',
-  imports: [SharedModule, FormsModule, ReactiveFormsModule],
+  standalone: true,
+  imports: [SharedModule, FormsModule, ReactiveFormsModule, FontAwesomeModule],
 })
 export class AddressUpdateComponent implements OnInit {
   isSaving = false;
   address: IAddress | null = null;
   ufValues = Object.keys(Uf);
+  isBuscandoCep = false;
+
+  // FontAwesome icons
+  spinnerIcon = faSpinner;
+  searchIcon = faMagnifyingGlass;
 
   protected addressService = inject(AddressService);
   protected addressFormService = inject(AddressFormService);
   protected activatedRoute = inject(ActivatedRoute);
 
-  // eslint-disable-next-line @typescript-eslint/member-ordering
+  constructor(protected cepLookupService: CepLookupService) {}
+
   editForm: AddressFormGroup = this.addressFormService.createAddressFormGroup();
 
   ngOnInit(): void {
@@ -62,11 +72,7 @@ export class AddressUpdateComponent implements OnInit {
   protected onSaveSuccess(): void {
     this.previousState();
   }
-
-  protected onSaveError(): void {
-    // Api for inheritance.
-  }
-
+  protected onSaveError(): void {}
   protected onSaveFinalize(): void {
     this.isSaving = false;
   }
@@ -76,7 +82,47 @@ export class AddressUpdateComponent implements OnInit {
     this.addressFormService.resetForm(this.editForm, address);
   }
 
-  onBuscarCep(): void {
-    /* TODO: chamar service, setar form e mensagens */
+  async onBuscarCep(): Promise<void> {
+    const cepControl = this.editForm.get('cep');
+    if (!cepControl) {
+      console.warn('CEP field not found in the address form');
+      return;
+    }
+    let cepValue: string | null = cepControl.value ?? null;
+    if (!cepValue) {
+      return;
+    }
+    cepValue = cepValue.replace(/\D/g, '');
+    if (cepValue.length !== 8) {
+      cepControl.setErrors({ invalidCep: true });
+      return;
+    }
+
+    this.isBuscandoCep = true;
+    try {
+      const address: IAddress = await firstValueFrom(this.cepLookupService.lookup(cepValue));
+      const currentNumber = this.editForm.get('number')?.value;
+      this.editForm.patchValue({
+        street: address.street ?? '',
+        complement: address.complement ?? '',
+        district: address.district ?? '',
+        city: address.city ?? '',
+        uf: address.uf ?? null,
+        number: currentNumber || '',
+      });
+    } catch (error: any) {
+      console.error('Error fetching CEP:', error);
+      if (error.status === 400) {
+        cepControl.setErrors({ invalidCep: true });
+      } else if (error.status === 404) {
+        cepControl.setErrors({ notFound: true });
+      } else if (error.status === 502) {
+        cepControl.setErrors({ serviceUnavailable: true });
+      } else {
+        cepControl.setErrors({ unknownError: true });
+      }
+    } finally {
+      this.isBuscandoCep = false;
+    }
   }
 }
