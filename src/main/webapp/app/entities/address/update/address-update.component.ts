@@ -3,6 +3,7 @@ import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { finalize } from 'rxjs/operators';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 import SharedModule from 'app/shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -34,6 +35,7 @@ export class AddressUpdateComponent implements OnInit {
   protected addressService = inject(AddressService);
   protected addressFormService = inject(AddressFormService);
   protected activatedRoute = inject(ActivatedRoute);
+  private snackBar = inject(MatSnackBar);
 
   constructor(protected cepLookupService: CepLookupService) {}
 
@@ -106,6 +108,15 @@ export class AddressUpdateComponent implements OnInit {
       if (address.complement != null) {
         currentComplement = address.complement;
       }
+
+      // Mostrar snackbar de sucesso
+      this.snackBar.open(`CEP ${cepValue} encontrado!`, 'Fechar', {
+        duration: 3000,
+        horizontalPosition: 'end',
+        verticalPosition: 'top',
+        panelClass: ['success-snackbar'],
+      });
+
       this.editForm.patchValue({
         street: address.street ?? '',
         complement: currentComplement ?? '',
@@ -118,12 +129,36 @@ export class AddressUpdateComponent implements OnInit {
       console.error('Error fetching CEP:', error);
       if (error.status === 400) {
         cepControl.setErrors({ invalidCep: true });
+        this.snackBar.open('CEP inválido', 'Fechar', {
+          duration: 5000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
       } else if (error.status === 404) {
         cepControl.setErrors({ notFound: true });
+        this.snackBar.open('CEP não encontrado', 'Fechar', {
+          duration: 5000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['warning-snackbar'],
+        });
       } else if (error.status === 502) {
         cepControl.setErrors({ serviceUnavailable: true });
+        this.snackBar.open('Serviço de CEP indisponível', 'Fechar', {
+          duration: 5000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
       } else {
         cepControl.setErrors({ unknownError: true });
+        this.snackBar.open('Erro inesperado ao buscar CEP', 'Fechar', {
+          duration: 5000,
+          horizontalPosition: 'end',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar'],
+        });
       }
     } finally {
       this.isBuscandoCep = false;

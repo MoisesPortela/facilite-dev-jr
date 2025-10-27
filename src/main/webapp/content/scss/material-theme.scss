@@ -1,0 +1,29 @@
+@use '@angular/material' as mat;
+
+.error-snackbar {
+  /* Use explicit colors to avoid deprecated material theming functions */
+  background: #d32f2f; /* red 700 */
+  color: #ffffff;
+
+  .mat-simple-snackbar-action {
+    color: #ffffff;
+  }
+}
+
+.warning-snackbar {
+  background: #ef6c00; /* orange 800-ish */
+  color: #ffffff;
+
+  .mat-simple-snackbar-action {
+    color: #ffffff;
+  }
+}
+
+.success-snackbar {
+  background: #43a047; /* green 600 */
+  color: #ffffff;
+
+  .mat-simple-snackbar-action {
+    color: #ffffff;
+  }
+}
