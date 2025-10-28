@@ -1,8 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription, firstValueFrom } from 'rxjs';
-import { finalize } from 'rxjs/operators';
+import { Observable, Subscription, of } from 'rxjs';
+import { finalize, catchError } from 'rxjs/operators';
 
 import SharedModule from 'app/shared/shared.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -14,6 +14,7 @@ import { IAddress } from '../address.model';
 import { AddressService } from '../service/address.service';
 import { AddressFormGroup, AddressFormService } from './address-form.service';
 import { CepLookupService } from 'app/entities/address/service/cep-lookup.service';
+import { NotificationService } from 'app/shared/notification/notification.service';
 
 @Component({
   selector: 'jhi-address-update',
@@ -27,13 +28,13 @@ export class AddressUpdateComponent implements OnInit {
   ufValues = Object.keys(Uf);
   isBuscandoCep = false;
 
-  // FontAwesome icons
   spinnerIcon = faSpinner;
   searchIcon = faMagnifyingGlass;
 
   protected addressService = inject(AddressService);
   protected addressFormService = inject(AddressFormService);
   protected activatedRoute = inject(ActivatedRoute);
+  protected notificationService = inject(NotificationService);
 
   constructor(protected cepLookupService: CepLookupService) {}
 
@@ -70,6 +71,7 @@ export class AddressUpdateComponent implements OnInit {
   }
 
   protected onSaveSuccess(): void {
+    this.notificationService.info('Endereço salvo com sucesso!');
     this.previousState();
   }
   protected onSaveError(): void {}
@@ -82,7 +84,7 @@ export class AddressUpdateComponent implements OnInit {
     this.addressFormService.resetForm(this.editForm, address);
   }
 
-  async onBuscarCep(): Promise<void> {
+  onBuscarCep(): void {
     const cepControl = this.editForm.get('cep');
     if (!cepControl) {
       console.warn('CEP field not found in the address form');
@@ -98,36 +100,59 @@ export class AddressUpdateComponent implements OnInit {
       return;
     }
 
+    cepControl.setErrors(null);
     this.isBuscandoCep = true;
-    try {
-      const address: IAddress = await firstValueFrom(this.cepLookupService.lookup(cepValue));
-      const currentNumber = this.editForm.get('number')?.value;
-      let currentComplement = this.editForm.get('complement')?.value;
-      if (address.complement != null) {
-        currentComplement = address.complement;
-      }
-      this.editForm.patchValue({
-        street: address.street ?? '',
-        complement: currentComplement ?? '',
-        district: address.district ?? '',
-        city: address.city ?? '',
-        uf: address.uf ?? null,
-        number: currentNumber || '',
+
+    this.cepLookupService
+      .lookup(cepValue, true)
+      .pipe(
+        catchError((error: any) => {
+          console.error('Error fetching CEP:', error);
+
+          if (error.status === 400) {
+            cepControl.setErrors({ invalidCep: true });
+          } else if (error.status === 404) {
+            cepControl.setErrors({ notFound: true });
+            this.notificationService.warning('CEP não encontrado');
+          } else if (error.status === 502) {
+            cepControl.setErrors({ serviceUnavailable: true });
+          } else {
+            cepControl.setErrors({ unknownError: true });
+          }
+
+          this.isBuscandoCep = false;
+
+          return of();
+        }),
+        finalize(() => {
+          this.isBuscandoCep = false;
+        }),
+      )
+      .subscribe({
+        next: (address: IAddress) => {
+          if (address) {
+            const currentNumber = this.editForm.get('number')?.value;
+            let currentComplement = this.editForm.get('complement')?.value;
+            if (address.complement != null) {
+              currentComplement = address.complement;
+            }
+
+            this.notificationService.success(`CEP ${cepValue} encontrado com sucesso!`);
+
+            this.editForm.patchValue({
+              street: address.street ?? '',
+              complement: currentComplement ?? '',
+              district: address.district ?? '',
+              city: address.city ?? '',
+              uf: address.uf ?? null,
+              number: currentNumber || '',
+            });
+          }
+        },
+        error: () => {
+          console.log('Fallback error handler - should not be called');
+        },
       });
-    } catch (error: any) {
-      console.error('Error fetching CEP:', error);
-      if (error.status === 400) {
-        cepControl.setErrors({ invalidCep: true });
-      } else if (error.status === 404) {
-        cepControl.setErrors({ notFound: true });
-      } else if (error.status === 502) {
-        cepControl.setErrors({ serviceUnavailable: true });
-      } else {
-        cepControl.setErrors({ unknownError: true });
-      }
-    } finally {
-      this.isBuscandoCep = false;
-    }
   }
   formatCep(): void {
     const cepControl = this.editForm.get('cep');
