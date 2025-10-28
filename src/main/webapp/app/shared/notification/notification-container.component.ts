@@ -103,7 +103,7 @@ import { faCheckCircle, faExclamationCircle, faExclamationTriangle, faInfoCircle
       }
 
       .notification-warning {
-        background-color: #ef6c00;
+        background-color: #d32f2f;
       }
 
       .notification-info {

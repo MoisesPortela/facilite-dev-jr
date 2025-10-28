@@ -71,6 +71,7 @@ export class AddressUpdateComponent implements OnInit {
   }
 
   protected onSaveSuccess(): void {
+    this.notificationService.info('Endereço salvo com sucesso!');
     this.previousState();
   }
   protected onSaveError(): void {}
@@ -110,16 +111,16 @@ export class AddressUpdateComponent implements OnInit {
 
           if (error.status === 400) {
             cepControl.setErrors({ invalidCep: true });
-            this.notificationService.error('CEP inválido');
+            // Notificação removida - apenas erro visual no campo
           } else if (error.status === 404) {
             cepControl.setErrors({ notFound: true });
             this.notificationService.warning('CEP não encontrado');
           } else if (error.status === 502) {
             cepControl.setErrors({ serviceUnavailable: true });
-            this.notificationService.error('Serviço de CEP indisponível');
+            // Notificação removida - apenas erro visual no campo
           } else {
             cepControl.setErrors({ unknownError: true });
-            this.notificationService.error('Erro inesperado ao buscar CEP');
+            // Notificação removida - apenas erro visual no campo
           }
 
           this.isBuscandoCep = false;
