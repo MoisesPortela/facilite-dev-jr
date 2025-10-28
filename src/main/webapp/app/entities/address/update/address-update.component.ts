@@ -111,16 +111,13 @@ export class AddressUpdateComponent implements OnInit {
 
           if (error.status === 400) {
             cepControl.setErrors({ invalidCep: true });
-            // Notificação removida - apenas erro visual no campo
           } else if (error.status === 404) {
             cepControl.setErrors({ notFound: true });
             this.notificationService.warning('CEP não encontrado');
           } else if (error.status === 502) {
             cepControl.setErrors({ serviceUnavailable: true });
-            // Notificação removida - apenas erro visual no campo
           } else {
             cepControl.setErrors({ unknownError: true });
-            // Notificação removida - apenas erro visual no campo
           }
 
           this.isBuscandoCep = false;
