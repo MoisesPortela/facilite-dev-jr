@@ -9,8 +9,4 @@ eg $input-color: red;
 // Import Bootstrap source files from node_modules
 @import 'bootstrap/scss/bootstrap';
 
-/* Material Design */
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
-@import 'material-theme.scss';
-
 /* jhipster-needle-scss-add-vendor JHipster will add new css style */
