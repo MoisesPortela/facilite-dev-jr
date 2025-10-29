@@ -25,6 +25,7 @@ import { NotificationService } from 'app/shared/notification/notification.servic
 })
 export class AddressUpdateComponent implements OnInit {
   isSaving = false;
+  titulo: string = 'Create a Address';
   address: IAddress | null = null;
   ufValues = Object.keys(Uf);
   isBuscandoCep = false;
@@ -46,6 +47,7 @@ export class AddressUpdateComponent implements OnInit {
       this.address = address;
       if (address) {
         this.updateForm(address);
+        this.titulo = 'Edit a Address';
       }
     });
   }
