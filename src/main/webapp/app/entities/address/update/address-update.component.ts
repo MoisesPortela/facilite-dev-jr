@@ -19,6 +19,7 @@ import { NotificationService } from 'app/shared/notification/notification.servic
 @Component({
   selector: 'jhi-address-update',
   templateUrl: './address-update.component.html',
+  styleUrls: ['./address-update.component.scss'],
   standalone: true,
   imports: [SharedModule, FormsModule, ReactiveFormsModule, FontAwesomeModule],
 })

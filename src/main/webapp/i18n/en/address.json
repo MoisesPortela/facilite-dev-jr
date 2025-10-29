@@ -26,7 +26,7 @@
       "city": "City",
       "uf": "Uf",
       "employee": "Employee",
-      "cepLookup": "Search CEP",
+      "cepLookup": "Search ZipCode/ Buscar CEP",
       "cepError": {
         "invalid": "Invalid CEP",
         "notFound": "CEP not found",

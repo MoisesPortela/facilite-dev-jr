@@ -1,0 +1,36 @@
+.btn.btn-primary {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: #ffffff;
+}
+
+.btn.btn-primary:disabled,
+.btn.btn-primary[disabled] {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: #ffffff !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+}
+
+// Estilos para o botão Cancel (vermelho)
+.btn.btn-danger {
+  background-color: #dc3545;
+  border-color: #dc3545;
+  color: #ffffff;
+}
+
+.btn.btn-danger:hover {
+  background-color: #c82333;
+  border-color: #bd2130;
+  color: #ffffff;
+}
+
+.error-messages {
+  margin-top: 0.25rem;
+}
+
+.error-messages small {
+  display: block;
+  margin-bottom: 0.125rem;
+}

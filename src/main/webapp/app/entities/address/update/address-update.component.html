@@ -31,40 +31,40 @@
             />
             <button type="button" class="btn btn-primary" (click)="onBuscarCep()" [disabled]="isBuscandoCep || !editForm.get('cep')?.valid">
               <fa-icon [icon]="isBuscandoCep ? spinnerIcon : searchIcon" [class.fa-spin]="isBuscandoCep"></fa-icon>&nbsp;
-              <span jhiTranslate="devjrApp.address.cepLookup">Buscar CEP</span>
+              <span jhiTranslate="devjrApp.address.cepLookup">Search ZipCode/ Buscar CEP</span>
             </button>
-            @if (cepRef.invalid && (cepRef.dirty || cepRef.touched)) {
-              <div>
-                @if (editForm.get('cep')?.errors?.required) {
-                  <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
-                }
-                @if (editForm.get('cep')?.errors?.minlength) {
-                  <small class="form-text text-danger" jhiTranslate="entity.validation.minlength" [translateValues]="{ min: '8' }"
-                    >This field is required to be at least 8 characters.</small
-                  >
-                }
-                @if (editForm.get('cep')?.errors?.maxlength) {
-                  <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '9' }"
-                    >This field cannot be longer than 9 characters.</small
-                  >
-                }
-                @if (editForm.get('cep')?.errors?.invalidCep) {
-                  <small class="form-text text-danger" jhiTranslate="devjrApp.address.cepError.invalid">Invalid CEP</small>
-                }
-                @if (editForm.get('cep')?.errors?.notFound) {
-                  <small class="form-text text-danger" jhiTranslate="devjrApp.address.cepError.notFound">CEP not found</small>
-                }
-                @if (editForm.get('cep')?.errors?.serviceUnavailable) {
-                  <small class="form-text text-danger" jhiTranslate="devjrApp.address.cepError.serviceUnavailable"
-                    >CEP service unavailable</small
-                  >
-                }
-                @if (editForm.get('cep')?.errors?.unknownError) {
-                  <small class="form-text text-danger">An unexpected error occurred</small>
-                }
-              </div>
-            }
           </div>
+          @if (cepRef.invalid && (cepRef.dirty || cepRef.touched)) {
+            <div class="error-messages">
+              @if (editForm.get('cep')?.errors?.required) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
+              }
+              @if (editForm.get('cep')?.errors?.minlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.minlength" [translateValues]="{ min: '8' }"
+                  >This field is required to be at least 8 characters.</small
+                >
+              }
+              @if (editForm.get('cep')?.errors?.maxlength) {
+                <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '9' }"
+                  >This field cannot be longer than 9 characters.</small
+                >
+              }
+              @if (editForm.get('cep')?.errors?.invalidCep) {
+                <small class="form-text text-danger" jhiTranslate="devjrApp.address.cepError.invalid">Invalid CEP</small>
+              }
+              @if (editForm.get('cep')?.errors?.notFound) {
+                <small class="form-text text-danger" jhiTranslate="devjrApp.address.cepError.notFound">CEP not found</small>
+              }
+              @if (editForm.get('cep')?.errors?.serviceUnavailable) {
+                <small class="form-text text-danger" jhiTranslate="devjrApp.address.cepError.serviceUnavailable"
+                  >CEP service unavailable</small
+                >
+              }
+              @if (editForm.get('cep')?.errors?.unknownError) {
+                <small class="form-text text-danger">An unexpected error occurred</small>
+              }
+            </div>
+          }
         </div>
 
         @let streetRef = editForm.get('street')!;
@@ -72,7 +72,7 @@
           <label class="form-label" for="field_street" jhiTranslate="devjrApp.address.street">Street</label>
           <input type="text" class="form-control" name="street" id="field_street" data-cy="street" formControlName="street" />
           @if (streetRef.invalid && (streetRef.dirty || streetRef.touched)) {
-            <div>
+            <div class="error-messages">
               @if (editForm.get('street')?.errors?.required) {
                 <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
               }
@@ -90,7 +90,7 @@
           <label class="form-label" for="field_number" jhiTranslate="devjrApp.address.number">Number</label>
           <input type="text" class="form-control" name="number" id="field_number" data-cy="number" formControlName="number" />
           @if (numberRef.invalid && (numberRef.dirty || numberRef.touched)) {
-            <div>
+            <div class="error-messages">
               @if (editForm.get('number')?.errors?.maxlength) {
                 <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '10' }"
                   >This field cannot be longer than 10 characters.</small
@@ -112,7 +112,7 @@
             formControlName="complement"
           />
           @if (complementRef.invalid && (complementRef.dirty || complementRef.touched)) {
-            <div>
+            <div class="error-messages">
               @if (editForm.get('complement')?.errors?.maxlength) {
                 <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '60' }"
                   >This field cannot be longer than 60 characters.</small
@@ -127,7 +127,7 @@
           <label class="form-label" for="field_district" jhiTranslate="devjrApp.address.district">District</label>
           <input type="text" class="form-control" name="district" id="field_district" data-cy="district" formControlName="district" />
           @if (districtRef.invalid && (districtRef.dirty || districtRef.touched)) {
-            <div>
+            <div class="error-messages">
               @if (editForm.get('district')?.errors?.maxlength) {
                 <small class="form-text text-danger" jhiTranslate="entity.validation.maxlength" [translateValues]="{ max: '80' }"
                   >This field cannot be longer than 80 characters.</small
@@ -142,7 +142,7 @@
           <label class="form-label" for="field_city" jhiTranslate="devjrApp.address.city">City</label>
           <input type="text" class="form-control" name="city" id="field_city" data-cy="city" formControlName="city" />
           @if (cityRef.invalid && (cityRef.dirty || cityRef.touched)) {
-            <div>
+            <div class="error-messages">
               @if (editForm.get('city')?.errors?.required) {
                 <small class="form-text text-danger" jhiTranslate="entity.validation.required">This field is required.</small>
               }
@@ -175,7 +175,7 @@
       </div>
 
       <div>
-        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-secondary" (click)="previousState()">
+        <button type="button" id="cancel-save" data-cy="entityCreateCancelButton" class="btn btn-danger" (click)="previousState()">
           <fa-icon icon="ban"></fa-icon>&nbsp;<span jhiTranslate="entity.action.cancel">Cancel</span>
         </button>
 
