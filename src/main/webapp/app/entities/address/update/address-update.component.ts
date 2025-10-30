@@ -25,10 +25,15 @@ import { NotificationService } from 'app/shared/notification/notification.servic
 })
 export class AddressUpdateComponent implements OnInit {
   isSaving = false;
-  titulo: string = 'Create a Address';
+  titulo = 'Create a Address';
   address: IAddress | null = null;
   ufValues = Object.keys(Uf);
+
+  // 🔄 Estados de Loading UX Avançados
   isBuscandoCep = false;
+  isLoadingFields = false;
+  loadingFields: string[] = [];
+  fieldStates: Record<string, 'loading' | 'success' | 'error' | 'normal'> = {};
 
   spinnerIcon = faSpinner;
   searchIcon = faMagnifyingGlass;
@@ -38,10 +43,9 @@ export class AddressUpdateComponent implements OnInit {
   protected activatedRoute = inject(ActivatedRoute);
   protected notificationService = inject(NotificationService);
 
-  constructor(protected cepLookupService: CepLookupService) {}
-
   editForm: AddressFormGroup = this.addressFormService.createAddressFormGroup();
 
+  constructor(protected cepLookupService: CepLookupService) {}
   ngOnInit(): void {
     this.activatedRoute.data.subscribe(({ address }) => {
       this.address = address;
@@ -77,7 +81,9 @@ export class AddressUpdateComponent implements OnInit {
     this.notificationService.info('Endereço salvo com sucesso!');
     this.previousState();
   }
-  protected onSaveError(): void {}
+  protected onSaveError(): void {
+    // TODO: Handle save error
+  }
   protected onSaveFinalize(): void {
     this.isSaving = false;
   }
@@ -104,7 +110,9 @@ export class AddressUpdateComponent implements OnInit {
     }
 
     cepControl.setErrors(null);
-    this.isBuscandoCep = true;
+    this.setFieldState('cep', 'normal');
+
+    this.startCepLookupLoading();
 
     this.cepLookupService
       .lookup(cepValue, true)
@@ -116,19 +124,21 @@ export class AddressUpdateComponent implements OnInit {
             cepControl.setErrors({ invalidCep: true });
           } else if (error.status === 404) {
             cepControl.setErrors({ notFound: true });
+            this.setFieldState('cep', 'error');
             this.notificationService.warning('CEP não encontrado');
           } else if (error.status === 502) {
             cepControl.setErrors({ serviceUnavailable: true });
+            this.setFieldState('cep', 'error');
           } else {
             cepControl.setErrors({ unknownError: true });
+            this.setFieldState('cep', 'error');
           }
 
-          this.isBuscandoCep = false;
-
+          this.stopCepLookupLoading();
           return of();
         }),
         finalize(() => {
-          this.isBuscandoCep = false;
+          this.stopCepLookupLoading();
         }),
       )
       .subscribe({
@@ -140,29 +150,104 @@ export class AddressUpdateComponent implements OnInit {
               currentComplement = address.complement;
             }
 
-            this.notificationService.success(`CEP ${cepValue} encontrado com sucesso!`);
+            this.notificationService.success(`CEP ${cepValue ?? ''} encontrado com sucesso!`);
 
-            this.editForm.patchValue({
-              street: address.street ?? '',
-              complement: currentComplement ?? '',
-              district: address.district ?? '',
-              city: address.city ?? '',
-              uf: address.uf ?? null,
-              number: currentNumber || '',
-            });
+            this.animateFieldFill(address, currentNumber, currentComplement);
           }
         },
         error: () => {
+          // eslint-disable-next-line no-console
           console.log('Fallback error handler - should not be called');
         },
       });
   }
+
+  private startCepLookupLoading(): void {
+    this.isBuscandoCep = true;
+    this.isLoadingFields = true;
+    this.loadingFields = ['street', 'district', 'city', 'uf'];
+
+    this.loadingFields.forEach(field => {
+      this.setFieldState(field, 'loading');
+    });
+  }
+
+  private stopCepLookupLoading(): void {
+    this.isBuscandoCep = false;
+    this.isLoadingFields = false;
+    this.loadingFields = [];
+  }
+
+  private animateFieldFill(address: IAddress, currentNumber: any, currentComplement: any): void {
+    const fieldsToFill = [
+      { name: 'street', value: address.street ?? '', delay: 100 },
+      { name: 'district', value: address.district ?? '', delay: 200 },
+      { name: 'city', value: address.city ?? '', delay: 300 },
+      { name: 'uf', value: address.uf ?? null, delay: 400 },
+    ];
+
+    fieldsToFill.forEach(({ name, value, delay }) => {
+      setTimeout(() => {
+        this.editForm.get(name)?.setValue(value);
+        this.setFieldState(name, 'success');
+
+        setTimeout(() => {
+          this.setFieldState(name, 'normal');
+        }, 2000);
+      }, delay);
+    });
+
+    setTimeout(() => {
+      this.editForm.patchValue({
+        number: currentNumber || '',
+        complement: currentComplement ?? '',
+      });
+      this.setFieldState('cep', 'success');
+
+      setTimeout(() => {
+        this.setFieldState('cep', 'normal');
+      }, 2000);
+    }, 500);
+  }
+
+  private setFieldState(fieldName: string, state: 'loading' | 'success' | 'error' | 'normal'): void {
+    this.fieldStates[fieldName] = state;
+  }
+
+  getFieldClass(fieldName: string): string {
+    const state = this.fieldStates[fieldName] || 'normal';
+    const baseClass = 'form-control';
+
+    switch (state) {
+      case 'loading':
+        return `${baseClass} field-loading`;
+      case 'success':
+        return `${baseClass} field-success`;
+      case 'error':
+        return `${baseClass} field-error`;
+      default:
+        return baseClass;
+    }
+  }
+
+  isFieldLoading(fieldName: string): boolean {
+    return this.fieldStates[fieldName] === 'loading';
+  }
+
+  getBtnCepClass(): string {
+    let baseClass = 'btn btn-outline-primary';
+    if (this.isBuscandoCep) {
+      baseClass += ' btn-loading';
+    }
+    return baseClass;
+  }
+
   formatCep(): void {
     const cepControl = this.editForm.get('cep');
     if (!cepControl) {
       return;
     }
-    const raw: string = (cepControl.value ?? '') as string;
+    const raw = (cepControl.value ?? '') as string;
     const digits = raw.replace(/\D/g, '').slice(0, 8);
     let formatted = digits;
     if (digits.length > 5) {

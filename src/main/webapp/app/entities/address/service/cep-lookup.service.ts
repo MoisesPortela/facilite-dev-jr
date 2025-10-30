@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -16,7 +15,7 @@ export class CepLookupService {
     this.resourceUrl = this.applicationConfigService.getEndpointFor('api/cep');
   }
 
-  lookup(cep: string, skipGlobalErrorHandler: boolean = false): Observable<IAddress> {
+  lookup(cep: string, skipGlobalErrorHandler = false): Observable<IAddress> {
     const headers = skipGlobalErrorHandler ? new HttpHeaders({ 'Skip-Global-Error-Handler': 'true' }) : undefined;
 
     return this.http.get<IAddress>(`${this.resourceUrl}/${cep}`, { headers });

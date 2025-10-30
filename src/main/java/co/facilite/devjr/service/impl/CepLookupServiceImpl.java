@@ -4,7 +4,6 @@ import co.facilite.devjr.domain.enumeration.Uf;
 import co.facilite.devjr.service.CepLookupService;
 import co.facilite.devjr.service.dto.AddressDTO;
 import co.facilite.devjr.service.dto.ViaCepResponse;
-import co.facilite.devjr.web.rest.errors.BadRequestAlertException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -23,11 +22,11 @@ public class CepLookupServiceImpl implements CepLookupService {
     @Override
     public String normalizeCep(String cepNaoFormatado) {
         if (cepNaoFormatado == null) {
-            throw new BadRequestAlertException("CEP não pode ser nulo", "cepLookup", "cepinvalido");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CEP não pode ser nulo");
         }
         String cepFormatado = cepNaoFormatado.replaceAll("\\D", "");
         if (cepFormatado.length() != 8) {
-            throw new BadRequestAlertException("CEP deve ter 8 digitos", "address", "cepinvalido");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "CEP deve ter 8 digitos");
         }
         return cepFormatado;
     }

@@ -17,19 +17,25 @@
 
         @let cepRef = editForm.get('cep')!;
         <div class="mb-3">
-          <label class="form-label" for="field_cep" jhiTranslate="devjrApp.address.cep">Cep</label>
+          <label class="form-label" for="field_cep" aria-placeholder="99999-999" jhiTranslate="devjrApp.address.cep">Cep</label>
           <div class="input-group">
             <input
               type="text"
-              class="form-control"
+              [class]="getFieldClass('cep')"
               name="cep"
               id="field_cep"
               data-cy="cep"
               formControlName="cep"
               (input)="formatCep()"
               maxlength="9"
+              placeholder="70711-900"
             />
-            <button type="button" class="btn btn-primary" (click)="onBuscarCep()" [disabled]="isBuscandoCep || !editForm.get('cep')?.valid">
+            <button
+              type="button"
+              [class]="getBtnCepClass()"
+              (click)="onBuscarCep()"
+              [disabled]="isBuscandoCep || !editForm.get('cep')?.valid"
+            >
               <fa-icon [icon]="isBuscandoCep ? spinnerIcon : searchIcon" [class.fa-spin]="isBuscandoCep"></fa-icon>&nbsp;
               <span jhiTranslate="devjrApp.address.cepLookup">Search ZipCode/ Buscar CEP</span>
             </button>
@@ -70,7 +76,15 @@
         @let streetRef = editForm.get('street')!;
         <div class="mb-3">
           <label class="form-label" for="field_street" jhiTranslate="devjrApp.address.street">Street</label>
-          <input type="text" class="form-control" name="street" id="field_street" data-cy="street" formControlName="street" />
+          <input
+            type="text"
+            [class]="getFieldClass('street')"
+            name="street"
+            id="field_street"
+            data-cy="street"
+            formControlName="street"
+            placeholder="SCN Quadra 1 Bloco A"
+          />
           @if (streetRef.invalid && (streetRef.dirty || streetRef.touched)) {
             <div class="error-messages">
               @if (editForm.get('street')?.errors?.required) {
@@ -88,7 +102,15 @@
         @let numberRef = editForm.get('number')!;
         <div class="mb-3">
           <label class="form-label" for="field_number" jhiTranslate="devjrApp.address.number">Number</label>
-          <input type="text" class="form-control" name="number" id="field_number" data-cy="number" formControlName="number" />
+          <input
+            type="text"
+            class="form-control"
+            name="number"
+            id="field_number"
+            data-cy="number"
+            formControlName="number"
+            placeholder="123"
+          />
           @if (numberRef.invalid && (numberRef.dirty || numberRef.touched)) {
             <div class="error-messages">
               @if (editForm.get('number')?.errors?.maxlength) {
@@ -110,6 +132,7 @@
             id="field_complement"
             data-cy="complement"
             formControlName="complement"
+            placeholder="Edifício Number One"
           />
           @if (complementRef.invalid && (complementRef.dirty || complementRef.touched)) {
             <div class="error-messages">
@@ -125,7 +148,15 @@
         @let districtRef = editForm.get('district')!;
         <div class="mb-3">
           <label class="form-label" for="field_district" jhiTranslate="devjrApp.address.district">District</label>
-          <input type="text" class="form-control" name="district" id="field_district" data-cy="district" formControlName="district" />
+          <input
+            type="text"
+            [class]="getFieldClass('district')"
+            name="district"
+            id="field_district"
+            data-cy="district"
+            formControlName="district"
+            placeholder="Asa Norte"
+          />
           @if (districtRef.invalid && (districtRef.dirty || districtRef.touched)) {
             <div class="error-messages">
               @if (editForm.get('district')?.errors?.maxlength) {
@@ -140,7 +171,15 @@
         @let cityRef = editForm.get('city')!;
         <div class="mb-3">
           <label class="form-label" for="field_city" jhiTranslate="devjrApp.address.city">City</label>
-          <input type="text" class="form-control" name="city" id="field_city" data-cy="city" formControlName="city" />
+          <input
+            type="text"
+            [class]="getFieldClass('city')"
+            name="city"
+            id="field_city"
+            data-cy="city"
+            formControlName="city"
+            placeholder="Brasília"
+          />
           @if (cityRef.invalid && (cityRef.dirty || cityRef.touched)) {
             <div class="error-messages">
               @if (editForm.get('city')?.errors?.required) {
@@ -158,8 +197,8 @@
         @let ufRef = editForm.get('uf')!;
         <div class="mb-3">
           <label class="form-label" for="field_uf" jhiTranslate="devjrApp.address.uf">Uf</label>
-          <select class="form-control" name="uf" formControlName="uf" id="field_uf" data-cy="uf">
-            <option [ngValue]="null">{{ 'devjrApp.Uf.null' | translate }}</option>
+          <select [class]="getFieldClass('uf')" name="uf" formControlName="uf" id="field_uf" data-cy="uf">
+            <option [ngValue]="null">Selecione o estado (ex: DF)</option>
             @for (uf of ufValues; track $index) {
               <option [value]="uf">{{ 'devjrApp.Uf.' + uf | translate }}</option>
             }

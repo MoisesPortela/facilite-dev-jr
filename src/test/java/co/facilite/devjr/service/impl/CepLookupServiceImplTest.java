@@ -6,7 +6,6 @@ import static org.mockito.Mockito.*;
 import co.facilite.devjr.domain.enumeration.Uf;
 import co.facilite.devjr.service.dto.AddressDTO;
 import co.facilite.devjr.service.dto.ViaCepResponse;
-import co.facilite.devjr.web.rest.errors.BadRequestAlertException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,13 +41,13 @@ class CepLookupServiceImplTest {
     }
 
     /**
-     * TESTE 1: Normalização de CEP funciona corretamente
+     * TESTE 1: Normalização de CEP com diferentes formatos válidos
      */
     @Test
     void normalizeCep_ValidFormats_ReturnsNormalizedCep() {
         assertThat(cepLookupService.normalizeCep("72006-206")).isEqualTo("72006206");
         assertThat(cepLookupService.normalizeCep("72006206")).isEqualTo("72006206");
-        assertThat(cepLookupService.normalizeCep("7200.10-100")).isEqualTo("720010100");
+        assertThat(cepLookupService.normalizeCep("72.006-206")).isEqualTo("72006206");
         assertThat(cepLookupService.normalizeCep(" 72006-206 ")).isEqualTo("72006206");
     }
 
@@ -56,10 +55,11 @@ class CepLookupServiceImplTest {
      * TESTE 2: CEP nulo lança exceção
      */
     @Test
-    void normalizeCep_NullCep_ThrowsException() {
+    void normalizeCep_NullInput_ThrowsException() {
         assertThatThrownBy(() -> cepLookupService.normalizeCep(null))
-            .isInstanceOf(BadRequestAlertException.class)
-            .hasMessageContaining("CEP não pode ser nulo");
+            .isInstanceOf(ResponseStatusException.class)
+            .extracting("status")
+            .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -68,12 +68,14 @@ class CepLookupServiceImplTest {
     @Test
     void normalizeCep_InvalidLength_ThrowsException() {
         assertThatThrownBy(() -> cepLookupService.normalizeCep("123"))
-            .isInstanceOf(BadRequestAlertException.class)
-            .hasMessageContaining("CEP deve ter 8 digitos");
+            .isInstanceOf(ResponseStatusException.class)
+            .extracting("status")
+            .isEqualTo(HttpStatus.BAD_REQUEST);
 
         assertThatThrownBy(() -> cepLookupService.normalizeCep("123456789"))
-            .isInstanceOf(BadRequestAlertException.class)
-            .hasMessageContaining("CEP deve ter 8 digitos");
+            .isInstanceOf(ResponseStatusException.class)
+            .extracting("status")
+            .isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
     /**
